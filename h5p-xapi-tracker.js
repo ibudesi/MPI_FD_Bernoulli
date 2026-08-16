@@ -18,7 +18,7 @@
  
 (function () {
   // >>> GANTI dengan URL Web App Google Apps Script Anda <<<
-  const WEBHOOK_URL = "https://script.google.com/macros/s/XXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec";
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbx4yhUXrbYtkDcquhfs8uVDgKRqS4_zYK3iR82toaKZrzyTCd0uK6eGI0JBztiMIC80Tw/exec";
  
   // Key penyimpanan nama & kelas peserta di browser (per tab/sesi)
   const STORAGE_KEY_NAME = "h5p_participant_name";
