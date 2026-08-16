@@ -18,8 +18,7 @@
 
 (function () {
   // >>> GANTI dengan URL Web App Google Apps Script Anda <<<
-  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxQ-QGnJE_zEagMFF8HzE3I_6wVp7AvQBl13Ra2JwIjvp3O2Ihm4OViO927HbYz-aQDsw/exec
-";
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxQ-QGnJE_zEagMFF8HzE3I_6wVp7AvQBl13Ra2JwIjvp3O2Ihm4OViO927HbYz-aQDsw/exec";
 
   // Key penyimpanan nama & kelas peserta di browser (per tab/sesi)
   const STORAGE_KEY_NAME = "h5p_participant_name";
