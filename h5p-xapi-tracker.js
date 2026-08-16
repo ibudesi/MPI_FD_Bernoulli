@@ -15,30 +15,30 @@
  *    Taruh SETELAH tag <script> yang memuat H5P Standalone / library H5P.
  * -----------------------------------------------------
  */
-
+ 
 (function () {
   // >>> GANTI dengan URL Web App Google Apps Script Anda <<<
   const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxQ-QGnJE_zEagMFF8HzE3I_6wVp7AvQBl13Ra2JwIjvp3O2Ihm4OViO927HbYz-aQDsw/exec";
-
+ 
   // Key penyimpanan nama & kelas peserta di browser (per tab/sesi)
   const STORAGE_KEY_NAME = "h5p_participant_name";
   const STORAGE_KEY_CLASS = "h5p_participant_class";
-
+ 
   // ============ 1. GATE / FORM NAMA & KELAS PESERTA ============
-
+ 
   function getParticipantName() {
     return sessionStorage.getItem(STORAGE_KEY_NAME) || "";
   }
-
+ 
   function getParticipantClass() {
     return sessionStorage.getItem(STORAGE_KEY_CLASS) || "";
   }
-
+ 
   function setParticipantData(name, className) {
     sessionStorage.setItem(STORAGE_KEY_NAME, name);
     sessionStorage.setItem(STORAGE_KEY_CLASS, className);
   }
-
+ 
   function showNameGate(onSubmit) {
     // Cegah H5P berinteraksi sebelum nama diisi
     const overlay = document.createElement("div");
@@ -50,7 +50,7 @@
       "z-index:999999", "font-family:sans-serif", "padding:16px",
       "box-sizing:border-box",
     ].join(";");
-
+ 
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:12px;padding:28px 24px;
                   max-width:360px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.3);
@@ -81,14 +81,14 @@
         </p>
       </div>
     `;
-
+ 
     document.body.appendChild(overlay);
-
+ 
     const nameInput = overlay.querySelector("#xapi-name-input");
     const classInput = overlay.querySelector("#xapi-class-input");
     const btn = overlay.querySelector("#xapi-name-submit");
     const error = overlay.querySelector("#xapi-name-error");
-
+ 
     function submit() {
       const name = nameInput.value.trim();
       const className = classInput.value.trim();
@@ -100,7 +100,7 @@
       overlay.remove();
       onSubmit(name, className);
     }
-
+ 
     btn.addEventListener("click", submit);
     [nameInput, classInput].forEach(function (el) {
       el.addEventListener("keydown", function (e) {
@@ -109,9 +109,9 @@
     });
     nameInput.focus();
   }
-
+ 
   // ============ 2. KIRIM DATA KE GOOGLE SHEETS ============
-
+ 
   function sendToSheet(payload) {
     fetch(WEBHOOK_URL, {
       method: "POST",
@@ -125,7 +125,7 @@
       console.error("[xAPI Tracker] Gagal mengirim data:", err);
     });
   }
-
+ 
   // Ambil field penting dari xAPI statement, gabungkan dengan nama & kelas peserta
   function extractXApiData(statement, participantName, participantClass) {
     const actor = statement.actor || {};
@@ -133,7 +133,7 @@
     const object = statement.object || {};
     const result = statement.result || {};
     const objDef = object.definition || {};
-
+ 
     return {
       timestamp: new Date().toISOString(),
       // Nama & kelas peserta yang diisi manual di form JADI SUMBER UTAMA,
@@ -158,45 +158,43 @@
       rawStatement: JSON.stringify(statement),
     };
   }
-
+ 
   // ============ 3. TANGKAP EVENT xAPI DARI H5P ============
-
+ 
   function initTracker(participantName, participantClass) {
     if (typeof H5P === "undefined" || !H5P.externalDispatcher) {
       // H5P mungkin belum termuat, coba lagi sebentar
       setTimeout(function () { initTracker(participantName, participantClass); }, 500);
       return;
     }
-
+ 
     H5P.externalDispatcher.on("xAPI", function (event) {
       const statement = event.data && event.data.statement;
       if (!statement) return;
-
+ 
       // Opsional: hanya kirim statement penting.
       // Kosongkan array ini (importantVerbs = []) jika ingin
       // menangkap SEMUA event xAPI (termasuk "interacted", "attempted", dll).
       const verbId = statement.verb && statement.verb.id;
-      const importantVerbs = [
-        "http://adlnet.gov/expapi/verbs/answered",
-        "http://adlnet.gov/expapi/verbs/completed",
-        "http://adlnet.gov/expapi/verbs/mastered",
-        "http://adlnet.gov/expapi/verbs/passed",
-        "http://adlnet.gov/expapi/verbs/failed",
-      ];
+      // >>> MODE DEBUG: filter dikosongkan agar SEMUA event xAPI tertangkap <<<
+      // Setelah tahu verb apa saja yang muncul di Console, isi kembali array
+      // ini dengan verb yang relevan saja (lihat instruksi di chat).
+      const importantVerbs = [];
+      console.log("[xAPI Tracker][DEBUG] Verb terdeteksi:", verbId);
       if (importantVerbs.length && !importantVerbs.includes(verbId)) {
         return;
       }
-
+ 
       const payload = extractXApiData(statement, getParticipantName(), getParticipantClass());
       console.log("[xAPI Tracker] Statement ditangkap:", payload);
       sendToSheet(payload);
     });
-
+ 
     console.log("[xAPI Tracker] Aktif untuk peserta:", participantName, "kelas:", participantClass);
   }
-
+ 
   // ============ 4. START ============
-
+ 
   function start() {
     const existingName = getParticipantName();
     const existingClass = getParticipantClass();
@@ -208,7 +206,7 @@
       });
     }
   }
-
+ 
   if (document.readyState === "complete" || document.readyState === "interactive") {
     start();
   } else {
